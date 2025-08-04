@@ -1,0 +1,11 @@
+Threshold_ID,Threshold_Type,Value,Description,Business_Impact
+1,Recency_Days,30,High-risk customers (30+ days inactive),Immediate retention action needed
+2,Recency_Days,60,Medium-risk customers (60+ days inactive),Targeted re-engagement
+3,Recency_Days,90,Churn definition (90+ days inactive),Standard churn threshold
+4,Recency_Days,180,Long-term inactive (180+ days inactive),Win-back campaigns
+5,Frequency_Minimum,1,Minimum transactions for active customer,Baseline activity
+6,Frequency_Optimal,3,Optimal transaction frequency,Healthy engagement
+7,Monetary_Minimum,50,Minimum spend for valuable customer,Value threshold
+8,Monetary_High_Value,200,High-value customer threshold,Premium retention
+9,Satisfaction_Minimum,3,Minimum satisfaction score,Quality threshold
+10,Satisfaction_Optimal,4,Optimal satisfaction score,Retention target 

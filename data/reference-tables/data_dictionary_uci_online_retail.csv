@@ -1,0 +1,15 @@
+Field Name,Data Type,Description,Source,Notes
+InvoiceNo,String,Invoice number for each transaction,UCI Online Retail Dataset,Unique identifier for each transaction
+StockCode,String,Product stock code,UCI Online Retail Dataset,Product identifier
+Description,String,Product description,UCI Online Retail Dataset,Text description of the product
+Quantity,Integer,Quantity of products purchased,UCI Online Retail Dataset,Number of units in transaction
+InvoiceDate,DateTime,Date and time of the transaction,UCI Online Retail Dataset,Timestamp of purchase
+UnitPrice,Float,Unit price of the product,UCI Online Retail Dataset,Price per unit in local currency
+CustomerID,Integer,Unique customer identifier,UCI Online Retail Dataset,Primary key for customer identification
+Country,String,Country where the transaction occurred,UCI Online Retail Dataset,Geographic location
+Recency,Integer,Number of days since last purchase,Calculated,RFM metric - days since last transaction
+Frequency,Integer,Number of unique transactions,Calculated,RFM metric - total number of purchases
+Monetary,Float,Total monetary value of purchases,Calculated,RFM metric - total spend amount
+AvgOrderValue,Float,Average order value per transaction,Calculated,Monetary divided by Frequency
+DaysSinceFirstPurchase,Integer,Number of days since first purchase,Calculated,Customer tenure in days
+Churned,Integer,Binary churn indicator (0=Retained, 1=Churned),Calculated,Target variable for prediction 

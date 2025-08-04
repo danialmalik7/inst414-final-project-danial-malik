@@ -1,0 +1,21 @@
+Field Name,Data Type,Description,Source,Notes
+CustomerID,Integer,Unique customer identifier,E-commerce Customer Churn Dataset,Primary key for customer identification
+Tenure,Integer,Number of months customer has been with the company,E-commerce Customer Churn Dataset,Customer loyalty period
+PreferredLoginDevice,String,Customer's preferred device for login,E-commerce Customer Churn Dataset,Categorical variable
+CityTier,Integer,Tier of the city where customer is located,E-commerce Customer Churn Dataset,1=Metro, 2=Semi-urban, 3=Rural
+WarehouseToHome,Float,Distance from warehouse to customer home,E-commerce Customer Churn Dataset,Distance in kilometers
+PreferredPaymentMode,String,Customer's preferred payment method,E-commerce Customer Churn Dataset,Categorical variable
+Gender,String,Customer's gender,E-commerce Customer Churn Dataset,Categorical variable
+HourSpendOnApp,Float,Number of hours spent on mobile app,E-commerce Customer Churn Dataset,Engagement metric
+NumberOfDeviceRegistered,Integer,Number of devices registered by customer,E-commerce Customer Churn Dataset,Device usage metric
+PreferedOrderCat,String,Customer's preferred order category,E-commerce Customer Churn Dataset,Product category preference
+SatisfactionScore,Integer,Customer satisfaction score (1-5),E-commerce Customer Churn Dataset,Rating scale
+MaritalStatus,String,Customer's marital status,E-commerce Customer Churn Dataset,Categorical variable
+NumberOfAddress,Integer,Number of addresses registered by customer,E-commerce Customer Churn Dataset,Address count
+Complain,Integer,Whether customer has complained (0=No, 1=Yes),E-commerce Customer Churn Dataset,Complaint indicator
+OrderAmountHikeFromlastYear,Float,Percentage increase in order amount from last year,E-commerce Customer Churn Dataset,Spending trend
+CouponUsed,Integer,Number of coupons used by customer,E-commerce Customer Churn Dataset,Coupon usage metric
+OrderCount,Integer,Total number of orders placed,E-commerce Customer Churn Dataset,Order frequency
+DaySinceLastOrder,Integer,Number of days since last order,E-commerce Customer Churn Dataset,Recency metric
+CashbackAmount,Float,Total cashback amount received,E-commerce Customer Churn Dataset,Loyalty program metric
+Churn,Integer,Binary churn indicator (0=Retained, 1=Churned),E-commerce Customer Churn Dataset,Target variable for prediction 

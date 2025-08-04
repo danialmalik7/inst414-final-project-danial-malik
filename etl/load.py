@@ -1,0 +1,193 @@
+"""
+Data loading and preparation.
+
+Author: Danial Malik
+"""
+
+import pandas as pd
+import numpy as np
+from pathlib import Path
+from typing import Dict, Optional
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+
+class DataLoader:
+    """
+    Loads and prepares data for analysis.
+    """
+    
+    def __init__(self):
+        """Initialize the DataLoader."""
+        self.processed_dir = Path("data/processed")
+        self.outputs_dir = Path("data/outputs")
+        self.outputs_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Model preparation settings
+        self.test_size = 0.2
+        self.random_state = 42
+        
+    def load_processed_data(self) -> Dict[str, pd.DataFrame]:
+        """
+        Load all processed datasets.
+        """
+        print("Loading processed datasets...")
+        
+        processed_data = {}
+        
+        # Load UCI Online Retail processed data
+        uci_path = self.processed_dir / "uci_online_retail_processed.csv"
+        if uci_path.exists():
+            uci_data = pd.read_csv(uci_path)
+            processed_data["uci_online_retail"] = uci_data
+            print(f"Loaded UCI data: {len(uci_data)} records")
+        
+        # Load E-commerce Churn processed data
+        churn_path = self.processed_dir / "ecommerce_churn_processed.csv"
+        if churn_path.exists():
+            churn_data = pd.read_csv(churn_path)
+            processed_data["ecommerce_churn"] = churn_data
+            print(f"Loaded E-commerce Churn data: {len(churn_data)} records")
+        
+        return processed_data
+    
+    def prepare_uci_data_for_modeling(self, uci_data: pd.DataFrame):
+        """
+        Prepare UCI Online Retail data for modeling.
+        """
+        print("Preparing UCI data for modeling...")
+        
+        # Select features for modeling
+        feature_columns = ['Recency', 'Frequency', 'Monetary', 'AvgOrderValue', 'DaysSinceFirstPurchase']
+        
+        # Ensure all features exist
+        available_features = [col for col in feature_columns if col in uci_data.columns]
+        
+        X = uci_data[available_features].copy()
+        y = uci_data['Churned']
+        
+        # Handle missing values
+        X = X.fillna(X.median())
+        
+        # Scale features
+        scaler = StandardScaler()
+        X_scaled = pd.DataFrame(
+            scaler.fit_transform(X),
+            columns=X.columns,
+            index=X.index
+        )
+        
+        print(f"Prepared UCI data: {X_scaled.shape[0]} samples, {X_scaled.shape[1]} features")
+        
+        return X_scaled, y
+    
+    def prepare_ecommerce_churn_data_for_modeling(self, churn_data: pd.DataFrame):
+        """
+        Prepare E-commerce Customer Churn data for modeling.
+        """
+        print("Preparing E-commerce Churn data for modeling...")
+        
+        # Select features for modeling
+        numeric_features = ['Tenure', 'HourSpendOnApp', 'NumberOfDeviceRegistered', 
+                          'SatisfactionScore', 'NumberOfAddress', 'Complain']
+        categorical_features = ['PreferredLoginDevice', 'PreferredPaymentMode', 'Gender', 
+                              'PreferedOrderCat', 'MaritalStatus']
+        
+        # Ensure features exist
+        available_numeric = [col for col in numeric_features if col in churn_data.columns]
+        available_categorical = [col for col in categorical_features if col in churn_data.columns]
+        
+        # Prepare numeric features
+        X_numeric = churn_data[available_numeric].copy()
+        
+        # Prepare categorical features
+        X_categorical = churn_data[available_categorical].copy()
+        
+        # Encode categorical variables
+        encoders = {}
+        for col in X_categorical.columns:
+            encoder = LabelEncoder()
+            X_categorical[col] = encoder.fit_transform(X_categorical[col].astype(str))
+            encoders[col] = encoder
+        
+        # Combine numeric and categorical features
+        X = pd.concat([X_numeric, X_categorical], axis=1)
+        y = churn_data['Churn'] if 'Churn' in churn_data.columns else churn_data['churn']
+        
+        # Handle missing values
+        X = X.fillna(X.median())
+        
+        # Scale features
+        scaler = StandardScaler()
+        X_scaled = pd.DataFrame(
+            scaler.fit_transform(X),
+            columns=X.columns,
+            index=X.index
+        )
+        
+        print(f"Prepared E-commerce Churn data: {X_scaled.shape[0]} samples, {X_scaled.shape[1]} features")
+        
+        return X_scaled, y
+    
+    def split_data(self, X: pd.DataFrame, y: pd.Series, dataset_name: str):
+        """
+        Split data into training and testing sets.
+        """
+        print(f"Splitting {dataset_name} data...")
+        
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=self.test_size, random_state=self.random_state, stratify=y
+        )
+        
+        print(f"Split complete: {len(X_train)} train, {len(X_test)} test")
+        
+        return X_train, X_test, y_train, y_test
+    
+    def load_all_data(self, processed_data_paths: Dict[str, pd.DataFrame]):
+        """
+        Load and prepare all data for analysis.
+        """
+        print("Loading and preparing all data...")
+        
+        analysis_ready_data = {}
+        
+        # Process UCI Online Retail data
+        if "uci_online_retail" in processed_data_paths:
+            uci_data = processed_data_paths["uci_online_retail"]['data']
+            X_uci, y_uci = self.prepare_uci_data_for_modeling(uci_data)
+            X_train_uci, X_test_uci, y_train_uci, y_test_uci = self.split_data(X_uci, y_uci, "UCI")
+            
+            analysis_ready_data["uci_online_retail"] = {
+                'X_train': X_train_uci,
+                'X_test': X_test_uci,
+                'y_train': y_train_uci,
+                'y_test': y_test_uci,
+                'data': uci_data
+            }
+        
+        # Process E-commerce Customer Churn data
+        if "ecommerce_churn" in processed_data_paths:
+            churn_data = processed_data_paths["ecommerce_churn"]['data']
+            X_churn, y_churn = self.prepare_ecommerce_churn_data_for_modeling(churn_data)
+            X_train_churn, X_test_churn, y_train_churn, y_test_churn = self.split_data(X_churn, y_churn, "E-commerce Churn")
+            
+            analysis_ready_data["ecommerce_churn"] = {
+                'X_train': X_train_churn,
+                'X_test': X_test_churn,
+                'y_train': y_train_churn,
+                'y_test': y_test_churn,
+                'data': churn_data
+            }
+        
+        print(f"Data loading complete. Prepared {len(analysis_ready_data)} datasets.")
+        
+        return analysis_ready_data
+
+def main():
+    """Main function to run data loading independently."""
+    loader = DataLoader()
+    
+    # Example usage
+    print("Data loading module")
+
+if __name__ == "__main__":
+    main() 

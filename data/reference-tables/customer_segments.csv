@@ -1,0 +1,10 @@
+Segment_ID,Segment_Name,RFM_Score_Range,Description,Business_Strategy
+1,Champions,9-12,High-value customers with recent purchases,Retention and upselling
+2,Loyal_Customers,8-9,Good customers with consistent purchases,Cross-selling opportunities
+3,At_Risk,6-7,Customers with declining engagement,Re-engagement campaigns
+4,Cant_Lose,5-6,High-value customers at risk of churning,Retention programs
+5,About_to_Sleep,4-5,Customers with declining activity,Reactivation campaigns
+6,Need_Attention,3-4,Customers with mixed RFM scores,Targeted marketing
+7,Promising,2-3,New customers with potential,Onboarding programs
+8,Recent_Customers,1-2,New customers with limited history,Welcome campaigns
+9,Lost_Customers,0-1,Customers who have churned,Win-back campaigns 
