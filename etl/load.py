@@ -6,6 +6,7 @@ Author: Danial Malik
 
 import pandas as pd
 import numpy as np
+import logging
 from pathlib import Path
 from typing import Dict, Optional
 from sklearn.model_selection import train_test_split
@@ -21,6 +22,7 @@ class DataLoader:
         self.processed_dir = Path("data/processed")
         self.outputs_dir = Path("data/outputs")
         self.outputs_dir.mkdir(parents=True, exist_ok=True)
+        self.logger = logging.getLogger(__name__)
         
         # Model preparation settings
         self.test_size = 0.2
@@ -30,55 +32,78 @@ class DataLoader:
         """
         Load all processed datasets.
         """
+        self.logger.info("Starting to load processed datasets...")
         print("Loading processed datasets...")
         
-        processed_data = {}
-        
-        # Load UCI Online Retail processed data
-        uci_path = self.processed_dir / "uci_online_retail_processed.csv"
-        if uci_path.exists():
-            uci_data = pd.read_csv(uci_path)
-            processed_data["uci_online_retail"] = uci_data
-            print(f"Loaded UCI data: {len(uci_data)} records")
-        
-        # Load E-commerce Churn processed data
-        churn_path = self.processed_dir / "ecommerce_churn_processed.csv"
-        if churn_path.exists():
-            churn_data = pd.read_csv(churn_path)
-            processed_data["ecommerce_churn"] = churn_data
-            print(f"Loaded E-commerce Churn data: {len(churn_data)} records")
-        
-        return processed_data
+        try:
+            processed_data = {}
+            
+            # Load UCI Online Retail processed data
+            uci_path = self.processed_dir / "uci_online_retail_processed.csv"
+            if uci_path.exists():
+                uci_data = pd.read_csv(uci_path)
+                processed_data["uci_online_retail"] = uci_data
+                self.logger.info(f"Successfully loaded UCI data: {len(uci_data)} records")
+                print(f"Loaded UCI data: {len(uci_data)} records")
+            else:
+                self.logger.warning("UCI processed data file not found")
+            
+            # Load E-commerce Churn processed data
+            churn_path = self.processed_dir / "ecommerce_churn_processed.csv"
+            if churn_path.exists():
+                churn_data = pd.read_csv(churn_path)
+                processed_data["ecommerce_churn"] = churn_data
+                self.logger.info(f"Successfully loaded E-commerce Churn data: {len(churn_data)} records")
+                print(f"Loaded E-commerce Churn data: {len(churn_data)} records")
+            else:
+                self.logger.warning("E-commerce Churn processed data file not found")
+            
+            self.logger.info(f"Data loading completed. Loaded {len(processed_data)} datasets")
+            return processed_data
+            
+        except Exception as e:
+            self.logger.error(f"Error loading processed data: {str(e)}")
+            print(f"Error loading processed data: {str(e)}")
+            raise
     
     def prepare_uci_data_for_modeling(self, uci_data: pd.DataFrame):
         """
         Prepare UCI Online Retail data for modeling.
         """
+        self.logger.info("Starting UCI data preparation for modeling...")
         print("Preparing UCI data for modeling...")
         
-        # Select features for modeling
-        feature_columns = ['Recency', 'Frequency', 'Monetary', 'AvgOrderValue', 'DaysSinceFirstPurchase']
-        
-        # Ensure all features exist
-        available_features = [col for col in feature_columns if col in uci_data.columns]
-        
-        X = uci_data[available_features].copy()
-        y = uci_data['Churned']
-        
-        # Handle missing values
-        X = X.fillna(X.median())
-        
-        # Scale features
-        scaler = StandardScaler()
-        X_scaled = pd.DataFrame(
-            scaler.fit_transform(X),
-            columns=X.columns,
-            index=X.index
-        )
-        
-        print(f"Prepared UCI data: {X_scaled.shape[0]} samples, {X_scaled.shape[1]} features")
-        
-        return X_scaled, y
+        try:
+            # Select features for modeling
+            feature_columns = ['Recency', 'Frequency', 'Monetary', 'AvgOrderValue', 'DaysSinceFirstPurchase']
+            
+            # Ensure all features exist
+            available_features = [col for col in feature_columns if col in uci_data.columns]
+            self.logger.info(f"Using features: {available_features}")
+            
+            X = uci_data[available_features].copy()
+            y = uci_data['Churned']
+            
+            # Handle missing values
+            X = X.fillna(X.median())
+            
+            # Scale features
+            scaler = StandardScaler()
+            X_scaled = pd.DataFrame(
+                scaler.fit_transform(X),
+                columns=X.columns,
+                index=X.index
+            )
+            
+            self.logger.info(f"UCI data preparation completed successfully. Shape: {X_scaled.shape}")
+            print(f"Prepared UCI data: {X_scaled.shape[0]} samples, {X_scaled.shape[1]} features")
+            
+            return X_scaled, y
+            
+        except Exception as e:
+            self.logger.error(f"Error preparing UCI data for modeling: {str(e)}")
+            print(f"Error preparing UCI data for modeling: {str(e)}")
+            raise
     
     def prepare_ecommerce_churn_data_for_modeling(self, churn_data: pd.DataFrame):
         """

@@ -6,6 +6,7 @@ Author: Danial Malik
 
 import pandas as pd
 import numpy as np
+import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
@@ -22,6 +23,7 @@ class DataTransformer:
         self.extracted_dir = Path("data/extracted")
         self.processed_dir = Path("data/processed")
         self.processed_dir.mkdir(parents=True, exist_ok=True)
+        self.logger = logging.getLogger(__name__)
         
         # Churn definition parameters
         self.churn_threshold_days = 90  # Customers inactive for 90+ days are considered churned
@@ -30,66 +32,85 @@ class DataTransformer:
         """
         Clean UCI Online Retail data.
         """
+        self.logger.info("Starting UCI Online Retail dataset cleaning...")
         print("Cleaning UCI Online Retail dataset...")
         
-        # Make a copy to avoid modifying original
-        df_clean = df.copy()
-        
-        # Remove cancelled invoices (InvoiceNo starting with 'C')
-        initial_count = len(df_clean)
-        df_clean = df_clean[~df_clean['InvoiceNo'].astype(str).str.startswith('C')]
-        print(f"Removed {initial_count - len(df_clean)} cancelled invoices")
-        
-        # Remove rows with missing CustomerID
-        initial_count = len(df_clean)
-        df_clean = df_clean.dropna(subset=['CustomerID'])
-        print(f"Removed {initial_count - len(df_clean)} rows with missing CustomerID")
-        
-        # Convert CustomerID to integer
-        df_clean['CustomerID'] = df_clean['CustomerID'].astype(int)
-        
-        # Convert InvoiceDate to datetime
-        df_clean['InvoiceDate'] = pd.to_datetime(df_clean['InvoiceDate'])
-        
-        # Remove rows with negative or zero quantities/prices
-        initial_count = len(df_clean)
-        df_clean = df_clean[
-            (df_clean['Quantity'] > 0) & 
-            (df_clean['UnitPrice'] > 0)
-        ]
-        print(f"Removed {initial_count - len(df_clean)} rows with invalid quantities/prices")
-        
-        # Calculate total amount for each transaction
-        df_clean['TotalAmount'] = df_clean['Quantity'] * df_clean['UnitPrice']
-        
-        print(f"Cleaned dataset: {len(df_clean)} records")
-        return df_clean
+        try:
+            # Make a copy to avoid modifying original
+            df_clean = df.copy()
+            
+            # Remove cancelled invoices (InvoiceNo starting with 'C')
+            initial_count = len(df_clean)
+            df_clean = df_clean[~df_clean['InvoiceNo'].astype(str).str.startswith('C')]
+            self.logger.info(f"Removed {initial_count - len(df_clean)} cancelled invoices")
+            print(f"Removed {initial_count - len(df_clean)} cancelled invoices")
+            
+            # Remove rows with missing CustomerID
+            initial_count = len(df_clean)
+            df_clean = df_clean.dropna(subset=['CustomerID'])
+            self.logger.info(f"Removed {initial_count - len(df_clean)} rows with missing CustomerID")
+            print(f"Removed {initial_count - len(df_clean)} rows with missing CustomerID")
+            
+            # Convert CustomerID to integer
+            df_clean['CustomerID'] = df_clean['CustomerID'].astype(int)
+            
+            # Convert InvoiceDate to datetime
+            df_clean['InvoiceDate'] = pd.to_datetime(df_clean['InvoiceDate'])
+            
+            # Remove rows with negative or zero quantities/prices
+            initial_count = len(df_clean)
+            df_clean = df_clean[
+                (df_clean['Quantity'] > 0) & 
+                (df_clean['UnitPrice'] > 0)
+            ]
+            self.logger.info(f"Removed {initial_count - len(df_clean)} rows with invalid quantities/prices")
+            print(f"Removed {initial_count - len(df_clean)} rows with invalid quantities/prices")
+            
+            # Calculate total amount for each transaction
+            df_clean['TotalAmount'] = df_clean['Quantity'] * df_clean['UnitPrice']
+            
+            self.logger.info(f"UCI Online Retail dataset cleaned successfully. Final records: {len(df_clean)}")
+            print(f"Cleaned dataset: {len(df_clean)} records")
+            return df_clean
+            
+        except Exception as e:
+            self.logger.error(f"Error cleaning UCI Online Retail dataset: {str(e)}")
+            print(f"Error cleaning UCI Online Retail dataset: {str(e)}")
+            raise
     
     def calculate_rfm_features(self, df: pd.DataFrame, reference_date: Optional[datetime] = None) -> pd.DataFrame:
         """
         Calculate RFM features.
         """
+        self.logger.info("Starting RFM features calculation...")
         print("Calculating RFM features...")
         
-        if reference_date is None:
-            reference_date = df['InvoiceDate'].max()
-        
-        # Group by customer and calculate RFM metrics
-        rfm = df.groupby('CustomerID').agg({
-            'InvoiceDate': lambda x: (reference_date - x.max()).days,  # Recency
-            'InvoiceNo': 'nunique',  # Frequency (unique invoices)
-            'TotalAmount': 'sum'  # Monetary
-        }).reset_index()
-        
-        # Rename columns
-        rfm.columns = ['CustomerID', 'Recency', 'Frequency', 'Monetary']
-        
-        # Calculate additional features
-        rfm['AvgOrderValue'] = rfm['Monetary'] / rfm['Frequency']
-        rfm['DaysSinceFirstPurchase'] = (reference_date - df.groupby('CustomerID')['InvoiceDate'].min()).dt.days
-        
-        print(f"RFM features calculated for {len(rfm)} customers")
-        return rfm
+        try:
+            if reference_date is None:
+                reference_date = df['InvoiceDate'].max()
+            
+            # Group by customer and calculate RFM metrics
+            rfm = df.groupby('CustomerID').agg({
+                'InvoiceDate': lambda x: (reference_date - x.max()).days,  # Recency
+                'InvoiceNo': 'nunique',  # Frequency (unique invoices)
+                'TotalAmount': 'sum'  # Monetary
+            }).reset_index()
+            
+            # Rename columns
+            rfm.columns = ['CustomerID', 'Recency', 'Frequency', 'Monetary']
+            
+            # Calculate additional features
+            rfm['AvgOrderValue'] = rfm['Monetary'] / rfm['Frequency']
+            rfm['DaysSinceFirstPurchase'] = (reference_date - df.groupby('CustomerID')['InvoiceDate'].min()).dt.days
+            
+            self.logger.info(f"RFM features calculated successfully for {len(rfm)} customers")
+            print(f"RFM features calculated for {len(rfm)} customers")
+            return rfm
+            
+        except Exception as e:
+            self.logger.error(f"Error calculating RFM features: {str(e)}")
+            print(f"Error calculating RFM features: {str(e)}")
+            raise
     
     def define_churn_labels(self, rfm_df: pd.DataFrame) -> pd.DataFrame:
         """
