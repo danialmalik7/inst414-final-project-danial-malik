@@ -1,0 +1,11 @@
+Feature_Name,Description,Data_Type,Source,Usage
+Logging_System,Comprehensive logging with timestamped files,Text,Python_logging,Debugging and monitoring
+Error_Handling,Robust error handling throughout pipeline,Boolean,Code_implementation,Data validation and pipeline robustness
+Model_Evaluation_Metrics,Accuracy, precision, recall, F1-score, ROC-AUC,Float,sklearn.metrics,Model performance assessment
+Confusion_Matrix,2x2 matrix of predicted vs actual values,Array,sklearn.metrics,Model performance visualization
+Classification_Report,Detailed precision, recall, f1-score by class,Dict,sklearn.metrics,Detailed model analysis
+Evaluation_Outputs,CSV files with detailed evaluation results,CSV,Code_generated,Model comparison and analysis
+RFM_Features,Recency, Frequency, Monetary customer metrics,Float,Calculated,Churn prediction features
+Churn_Threshold,90 days inactivity threshold for churn definition,Integer,Business_logic,Churn labeling
+Data_Validation,Enhanced data quality checks and validation,Boolean,Code_implementation,Data quality assurance
+Pipeline_Logging,Step-by-step pipeline execution logging,Text,Code_generated,Execution monitoring and debugging

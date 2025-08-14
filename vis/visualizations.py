@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import logging
 from pathlib import Path
 from typing import Dict
 
@@ -21,6 +22,7 @@ class VisualizationGenerator:
         self.outputs_dir = Path("data/outputs")
         self.vis_dir = Path("data/outputs/visualizations")
         self.vis_dir.mkdir(parents=True, exist_ok=True)
+        self.logger = logging.getLogger(__name__)
         
         # Set up plotting style
         plt.style.use('default')
@@ -36,57 +38,76 @@ class VisualizationGenerator:
         """
         Create data exploration visualizations.
         """
+        self.logger.info("Starting data exploration visualization creation...")
         print("Creating data exploration visualizations...")
         
-        for dataset_name, data_dict in analysis_ready_data.items():
-            data = data_dict['data']
+        try:
+            for dataset_name, data_dict in analysis_ready_data.items():
+                self.logger.info(f"Processing dataset: {dataset_name}")
+                data = data_dict['data']
+                
+                # Create dataset-specific visualizations
+                if dataset_name == "uci_online_retail":
+                    self.create_uci_exploration_plots(data, dataset_name)
+                elif dataset_name == "ecommerce_churn":
+                    self.create_ecommerce_exploration_plots(data, dataset_name)
             
-            # Create dataset-specific visualizations
-            if dataset_name == "uci_online_retail":
-                self.create_uci_exploration_plots(data, dataset_name)
-            elif dataset_name == "ecommerce_churn":
-                self.create_ecommerce_exploration_plots(data, dataset_name)
+            self.logger.info("Data exploration visualizations created successfully")
+            
+        except Exception as e:
+            self.logger.error(f"Error creating data exploration visualizations: {str(e)}")
+            print(f"Error creating data exploration visualizations: {str(e)}")
+            raise
     
     def create_uci_exploration_plots(self, data: pd.DataFrame, dataset_name: str):
         """
         Create exploration plots for UCI Online Retail data.
         """
-        fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-        fig.suptitle(f'UCI Online Retail Data Exploration', fontsize=16)
+        self.logger.info(f"Creating UCI exploration plots for {dataset_name}...")
         
-        # Plot 1: RFM Distribution
-        rfm_features = ['Recency', 'Frequency', 'Monetary']
-        for i, feature in enumerate(rfm_features):
-            if feature in data.columns:
-                axes[0, i].hist(data[feature], bins=30, alpha=0.7, color=self.colors['neutral'])
-                axes[0, i].set_title(f'{feature} Distribution')
-                axes[0, i].set_xlabel(feature)
-                axes[0, i].set_ylabel('Count')
-        
-        # Plot 2: Churn Rate
-        if 'Churned' in data.columns:
-            churn_counts = data['Churned'].value_counts()
-            axes[1, 0].pie(churn_counts.values, labels=['Retained', 'Churned'], 
-                          autopct='%1.1f%%', colors=[self.colors['retained'], self.colors['churned']])
-            axes[1, 0].set_title('Churn Distribution')
-        
-        # Plot 3: RFM vs Churn
-        if all(feature in data.columns for feature in rfm_features + ['Churned']):
+        try:
+            fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+            fig.suptitle(f'UCI Online Retail Data Exploration', fontsize=16)
+            
+            # Plot 1: RFM Distribution
+            rfm_features = ['Recency', 'Frequency', 'Monetary']
             for i, feature in enumerate(rfm_features):
-                axes[1, i+1].boxplot([data[data['Churned']==0][feature], 
-                                     data[data['Churned']==1][feature]], 
-                                    labels=['Retained', 'Churned'])
-                axes[1, i+1].set_title(f'{feature} by Churn Status')
-                axes[1, i+1].set_ylabel(feature)
-        
-        plt.tight_layout()
-        
-        # Save plot
-        plot_path = self.vis_dir / f"{dataset_name}_exploration.png"
-        plt.savefig(plot_path, dpi=300, bbox_inches='tight')
-        plt.close()
-        
-        print(f"Created UCI exploration plots for {dataset_name}")
+                if feature in data.columns:
+                    axes[0, i].hist(data[feature], bins=30, alpha=0.7, color=self.colors['neutral'])
+                    axes[0, i].set_title(f'{feature} Distribution')
+                    axes[0, i].set_xlabel(feature)
+                    axes[0, i].set_ylabel('Count')
+            
+            # Plot 2: Churn Rate
+            if 'Churned' in data.columns:
+                churn_counts = data['Churned'].value_counts()
+                axes[1, 0].pie(churn_counts.values, labels=['Retained', 'Churned'], 
+                              autopct='%1.1f%%', colors=[self.colors['retained'], self.colors['churned']])
+                axes[1, 0].set_title('Churn Distribution')
+            
+            # Plot 3: RFM vs Churn
+            if all(feature in data.columns for feature in rfm_features + ['Churned']):
+                for i, feature in enumerate(rfm_features):
+                    axes[1, i+1].boxplot([data[data['Churned']==0][feature], 
+                                         data[data['Churned']==1][feature]], 
+                                        labels=['Retained', 'Churned'])
+                    axes[1, i+1].set_title(f'{feature} by Churn Status')
+                    axes[1, i+1].set_ylabel(feature)
+            
+            plt.tight_layout()
+            
+            # Save plot
+            plot_path = self.vis_dir / f"{dataset_name}_exploration.png"
+            plt.savefig(plot_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            
+            self.logger.info(f"UCI exploration plots created successfully for {dataset_name}")
+            print(f"Created UCI exploration plots for {dataset_name}")
+            
+        except Exception as e:
+            self.logger.error(f"Error creating UCI exploration plots for {dataset_name}: {str(e)}")
+            print(f"Error creating UCI exploration plots: {str(e)}")
+            raise
     
     def create_ecommerce_exploration_plots(self, data: pd.DataFrame, dataset_name: str):
         """
