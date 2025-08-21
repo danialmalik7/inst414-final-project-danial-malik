@@ -33,7 +33,6 @@ class DataTransformer:
         Clean UCI Online Retail data.
         """
         self.logger.info("Starting UCI Online Retail dataset cleaning...")
-        print("Cleaning UCI Online Retail dataset...")
         
         try:
             # Make a copy to avoid modifying original
@@ -43,13 +42,11 @@ class DataTransformer:
             initial_count = len(df_clean)
             df_clean = df_clean[~df_clean['InvoiceNo'].astype(str).str.startswith('C')]
             self.logger.info(f"Removed {initial_count - len(df_clean)} cancelled invoices")
-            print(f"Removed {initial_count - len(df_clean)} cancelled invoices")
             
             # Remove rows with missing CustomerID
             initial_count = len(df_clean)
             df_clean = df_clean.dropna(subset=['CustomerID'])
             self.logger.info(f"Removed {initial_count - len(df_clean)} rows with missing CustomerID")
-            print(f"Removed {initial_count - len(df_clean)} rows with missing CustomerID")
             
             # Convert CustomerID to integer
             df_clean['CustomerID'] = df_clean['CustomerID'].astype(int)
@@ -64,18 +61,15 @@ class DataTransformer:
                 (df_clean['UnitPrice'] > 0)
             ]
             self.logger.info(f"Removed {initial_count - len(df_clean)} rows with invalid quantities/prices")
-            print(f"Removed {initial_count - len(df_clean)} rows with invalid quantities/prices")
             
             # Calculate total amount for each transaction
             df_clean['TotalAmount'] = df_clean['Quantity'] * df_clean['UnitPrice']
             
             self.logger.info(f"UCI Online Retail dataset cleaned successfully. Final records: {len(df_clean)}")
-            print(f"Cleaned dataset: {len(df_clean)} records")
             return df_clean
             
         except Exception as e:
             self.logger.error(f"Error cleaning UCI Online Retail dataset: {str(e)}")
-            print(f"Error cleaning UCI Online Retail dataset: {str(e)}")
             raise
     
     def calculate_rfm_features(self, df: pd.DataFrame, reference_date: Optional[datetime] = None) -> pd.DataFrame:
@@ -83,7 +77,6 @@ class DataTransformer:
         Calculate RFM features.
         """
         self.logger.info("Starting RFM features calculation...")
-        print("Calculating RFM features...")
         
         try:
             if reference_date is None:
@@ -104,12 +97,10 @@ class DataTransformer:
             rfm['DaysSinceFirstPurchase'] = (reference_date - df.groupby('CustomerID')['InvoiceDate'].min()).dt.days
             
             self.logger.info(f"RFM features calculated successfully for {len(rfm)} customers")
-            print(f"RFM features calculated for {len(rfm)} customers")
             return rfm
             
         except Exception as e:
             self.logger.error(f"Error calculating RFM features: {str(e)}")
-            print(f"Error calculating RFM features: {str(e)}")
             raise
     
     def define_churn_labels(self, rfm_df: pd.DataFrame) -> pd.DataFrame:
@@ -177,7 +168,7 @@ class DataTransformer:
         """
         Transform UCI Online Retail data.
         """
-        print("Transforming UCI Online Retail data...")
+        self.logger.info("Transforming UCI Online Retail data...")
         
         # Load raw data
         df = pd.read_csv(raw_data_path)
@@ -198,7 +189,7 @@ class DataTransformer:
         output_path = self.processed_dir / "uci_online_retail_processed.csv"
         final_df.to_csv(output_path, index=False)
         
-        print(f"UCI data transformation complete. Saved to {output_path}")
+        self.logger.info(f"UCI data transformation complete. Saved to {output_path}")
         
         return final_df, eda_results
     
@@ -206,7 +197,7 @@ class DataTransformer:
         """
         Transform E-commerce Customer Churn data.
         """
-        print("Transforming E-commerce Customer Churn data...")
+        self.logger.info("Transforming E-commerce Customer Churn data...")
         
         # Load raw data
         df = pd.read_csv(raw_data_path)
@@ -221,7 +212,7 @@ class DataTransformer:
         output_path = self.processed_dir / "ecommerce_churn_processed.csv"
         df_clean.to_csv(output_path, index=False)
         
-        print(f"E-commerce Churn data transformation complete. Saved to {output_path}")
+        self.logger.info(f"E-commerce Churn data transformation complete. Saved to {output_path}")
         
         return df_clean, eda_results
     
@@ -229,7 +220,11 @@ class DataTransformer:
         """
         Transform all datasets.
         """
-        print("Starting data transformation...")
+        self.logger.info("Starting data transformation...")
+        
+        if not raw_data_paths:
+            self.logger.error("No raw data provided for transformation")
+            raise ValueError("No raw data available - pipeline cannot continue")
         
         transformed_data = {}
         
@@ -240,6 +235,9 @@ class DataTransformer:
                 'data': uci_df,
                 'eda': uci_eda
             }
+        else:
+            self.logger.error("UCI Online Retail data not found in raw data")
+            raise ValueError("UCI Online Retail data not available for transformation")
         
         # Transform E-commerce Customer Churn data
         if "ecommerce_churn" in raw_data_paths:
@@ -248,8 +246,16 @@ class DataTransformer:
                 'data': churn_df,
                 'eda': churn_eda
             }
+        else:
+            self.logger.error("E-commerce Customer Churn data not found in raw data")
+            raise ValueError("E-commerce Customer Churn data not available for transformation")
         
-        print(f"Transformation complete. Transformed {len(transformed_data)} datasets.")
+        # Validate transformation results
+        if len(transformed_data) == 0:
+            self.logger.error("No datasets were successfully transformed")
+            raise ValueError("No transformed data available - pipeline cannot continue")
+        
+        self.logger.info(f"Transformation complete. Transformed {len(transformed_data)} datasets.")
         
         return transformed_data
 

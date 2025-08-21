@@ -76,7 +76,6 @@ class ModelEvaluator:
         Evaluate a single model.
         """
         self.logger.info(f"Evaluating {model_name} on {dataset_name}...")
-        print(f"Evaluating {model_name} on {dataset_name}...")
         
         try:
             # Make predictions
@@ -116,7 +115,6 @@ class ModelEvaluator:
             self.save_evaluation_results(results, model_name, dataset_name)
             
             self.logger.info(f"{model_name} evaluation completed successfully. Accuracy: {accuracy:.4f}, F1: {f1:.4f}")
-            print(f"{model_name} results - Accuracy: {accuracy:.4f}, F1: {f1:.4f}")
             
             return results
             
@@ -130,7 +128,6 @@ class ModelEvaluator:
         Evaluate all models for a specific dataset.
         """
         self.logger.info(f"Evaluating models for {dataset_name}...")
-        print(f"Evaluating models for {dataset_name}...")
         
         try:
             X_test = data_dict['X_test']
@@ -156,7 +153,6 @@ class ModelEvaluator:
         Evaluate all models for all datasets.
         """
         self.logger.info("Starting evaluation of all models...")
-        print("Evaluating all models...")
         
         try:
             all_evaluation_results = {}
@@ -171,13 +167,11 @@ class ModelEvaluator:
             self.create_evaluation_summary(all_evaluation_results)
             
             self.logger.info(f"Model evaluation completed successfully. Evaluated models for {len(all_evaluation_results)} datasets.")
-            print(f"Model evaluation complete. Evaluated models for {len(all_evaluation_results)} datasets.")
             
             return all_evaluation_results
             
         except Exception as e:
             self.logger.error(f"Error in model evaluation pipeline: {str(e)}")
-            print(f"Error in model evaluation pipeline: {str(e)}")
             raise
     
     def create_evaluation_summary(self, all_evaluation_results: Dict):

@@ -22,12 +22,14 @@ class ChurnPredictor:
         """Initialize the ChurnPredictor."""
         self.outputs_dir = Path("data/outputs")
         self.outputs_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Setup logging
         self.logger = logging.getLogger(__name__)
         
-        # Model configurations
-        self.models = {
-            'logistic_regression': LogisticRegression(random_state=42, max_iter=1000),
-            'random_forest': RandomForestClassifier(random_state=42)
+        # Model configurations - we'll create new instances for each dataset
+        self.model_configs = {
+            'logistic_regression': lambda: LogisticRegression(random_state=42, max_iter=1000),
+            'random_forest': lambda: RandomForestClassifier(random_state=42)
         }
         
         self.trained_models = {}
@@ -38,10 +40,9 @@ class ChurnPredictor:
         Train a Logistic Regression model for churn prediction.
         """
         self.logger.info(f"Training Logistic Regression model for {dataset_name}...")
-        print(f"Training Logistic Regression model for {dataset_name}...")
         
         try:
-            model = self.models['logistic_regression']
+            model = self.model_configs['logistic_regression']()
             
             # Train the model
             model.fit(X_train, y_train)
@@ -60,13 +61,11 @@ class ChurnPredictor:
             }
             
             self.logger.info(f"Logistic Regression trained successfully. CV F1: {cv_scores.mean():.4f}")
-            print(f"Logistic Regression trained. CV F1: {cv_scores.mean():.4f}")
             
             return results
             
         except Exception as e:
             self.logger.error(f"Error training Logistic Regression for {dataset_name}: {str(e)}")
-            print(f"Error training Logistic Regression: {str(e)}")
             raise
     
     def train_random_forest(self, X_train: pd.DataFrame, y_train: pd.Series, 
@@ -75,10 +74,9 @@ class ChurnPredictor:
         Train a Random Forest model for churn prediction.
         """
         self.logger.info(f"Training Random Forest model for {dataset_name}...")
-        print(f"Training Random Forest model for {dataset_name}...")
         
         try:
-            model = self.models['random_forest']
+            model = self.model_configs['random_forest']()
             
             # Train the model
             model.fit(X_train, y_train)
@@ -104,13 +102,11 @@ class ChurnPredictor:
             }
             
             self.logger.info(f"Random Forest trained successfully. CV F1: {cv_scores.mean():.4f}")
-            print(f"Random Forest trained. CV F1: {cv_scores.mean():.4f}")
             
             return results
             
         except Exception as e:
             self.logger.error(f"Error training Random Forest for {dataset_name}: {str(e)}")
-            print(f"Error training Random Forest: {str(e)}")
             raise
     
     def train_models_for_dataset(self, data_dict: Dict, dataset_name: str):
@@ -118,7 +114,6 @@ class ChurnPredictor:
         Train all models for a specific dataset.
         """
         self.logger.info(f"Training models for {dataset_name}...")
-        print(f"Training models for {dataset_name}...")
         
         try:
             X_train = data_dict['X_train']
@@ -139,7 +134,6 @@ class ChurnPredictor:
             
         except Exception as e:
             self.logger.error(f"Error training models for {dataset_name}: {str(e)}")
-            print(f"Error training models for {dataset_name}: {str(e)}")
             raise
     
     def train_models(self, analysis_ready_data: Dict[str, Dict]):
@@ -147,7 +141,6 @@ class ChurnPredictor:
         Train models for all datasets.
         """
         self.logger.info("Starting model training for all datasets...")
-        print("Training models for all datasets...")
         
         try:
             all_models = {}
@@ -158,13 +151,11 @@ class ChurnPredictor:
                 all_models[dataset_name] = dataset_models
             
             self.logger.info(f"Model training completed successfully. Trained models for {len(all_models)} datasets.")
-            print(f"Model training complete. Trained models for {len(all_models)} datasets.")
             
             return all_models
             
         except Exception as e:
             self.logger.error(f"Error in model training pipeline: {str(e)}")
-            print(f"Error in model training pipeline: {str(e)}")
             raise
 
 def main():

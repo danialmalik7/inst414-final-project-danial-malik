@@ -39,25 +39,17 @@ class VisualizationGenerator:
         Create data exploration visualizations.
         """
         self.logger.info("Starting data exploration visualization creation...")
-        print("Creating data exploration visualizations...")
         
-        try:
-            for dataset_name, data_dict in analysis_ready_data.items():
-                self.logger.info(f"Processing dataset: {dataset_name}")
-                data = data_dict['data']
-                
-                # Create dataset-specific visualizations
-                if dataset_name == "uci_online_retail":
-                    self.create_uci_exploration_plots(data, dataset_name)
-                elif dataset_name == "ecommerce_churn":
-                    self.create_ecommerce_exploration_plots(data, dataset_name)
+        for dataset_name, data_dict in analysis_ready_data.items():
+            data = data_dict['data']
             
-            self.logger.info("Data exploration visualizations created successfully")
-            
-        except Exception as e:
-            self.logger.error(f"Error creating data exploration visualizations: {str(e)}")
-            print(f"Error creating data exploration visualizations: {str(e)}")
-            raise
+            # Create dataset-specific visualizations
+            if dataset_name == "uci_online_retail":
+                self.create_uci_exploration_plots(data, dataset_name)
+            elif dataset_name == "ecommerce_churn":
+                self.create_ecommerce_exploration_plots(data, dataset_name)
+        
+        self.logger.info("Data exploration visualizations created successfully")
     
     def create_uci_exploration_plots(self, data: pd.DataFrame, dataset_name: str):
         """
@@ -66,10 +58,11 @@ class VisualizationGenerator:
         self.logger.info(f"Creating UCI exploration plots for {dataset_name}...")
         
         try:
-            fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+            # Create a 2x3 grid to accommodate 3 RFM features + 3 other plots
+            fig, axes = plt.subplots(2, 3, figsize=(18, 10))
             fig.suptitle(f'UCI Online Retail Data Exploration', fontsize=16)
             
-            # Plot 1: RFM Distribution
+            # Plot 1-3: RFM Distribution (top row)
             rfm_features = ['Recency', 'Frequency', 'Monetary']
             for i, feature in enumerate(rfm_features):
                 if feature in data.columns:
@@ -78,16 +71,16 @@ class VisualizationGenerator:
                     axes[0, i].set_xlabel(feature)
                     axes[0, i].set_ylabel('Count')
             
-            # Plot 2: Churn Rate
+            # Plot 4: Churn Rate (bottom left)
             if 'Churned' in data.columns:
                 churn_counts = data['Churned'].value_counts()
                 axes[1, 0].pie(churn_counts.values, labels=['Retained', 'Churned'], 
                               autopct='%1.1f%%', colors=[self.colors['retained'], self.colors['churned']])
                 axes[1, 0].set_title('Churn Distribution')
             
-            # Plot 3: RFM vs Churn
+            # Plot 5-6: RFM vs Churn (bottom middle and right)
             if all(feature in data.columns for feature in rfm_features + ['Churned']):
-                for i, feature in enumerate(rfm_features):
+                for i, feature in enumerate(rfm_features[:2]):  # Only plot first 2 RFM features
                     axes[1, i+1].boxplot([data[data['Churned']==0][feature], 
                                          data[data['Churned']==1][feature]], 
                                         labels=['Retained', 'Churned'])
@@ -102,11 +95,9 @@ class VisualizationGenerator:
             plt.close()
             
             self.logger.info(f"UCI exploration plots created successfully for {dataset_name}")
-            print(f"Created UCI exploration plots for {dataset_name}")
             
         except Exception as e:
             self.logger.error(f"Error creating UCI exploration plots for {dataset_name}: {str(e)}")
-            print(f"Error creating UCI exploration plots: {str(e)}")
             raise
     
     def create_ecommerce_exploration_plots(self, data: pd.DataFrame, dataset_name: str):
@@ -153,17 +144,17 @@ class VisualizationGenerator:
         plot_path = self.vis_dir / f"{dataset_name}_exploration.png"
         plt.savefig(plot_path, dpi=300, bbox_inches='tight')
         plt.close()
-        
-        print(f"Created E-commerce exploration plots for {dataset_name}")
     
     def create_model_performance_plots(self, evaluation_results: Dict[str, Dict]):
         """
         Create model performance visualizations.
         """
-        print("Creating model performance visualizations...")
+        self.logger.info("Starting model performance visualization creation...")
         
         for dataset_name, dataset_results in evaluation_results.items():
             self.create_dataset_performance_plots(dataset_results, dataset_name)
+        
+        self.logger.info("Model performance visualizations created successfully")
     
     def create_dataset_performance_plots(self, dataset_results: Dict, dataset_name: str):
         """
@@ -221,19 +212,21 @@ class VisualizationGenerator:
         plt.savefig(plot_path, dpi=300, bbox_inches='tight')
         plt.close()
         
-        print(f"Created performance plots for {dataset_name}")
+        self.logger.info(f"Performance plots created successfully for {dataset_name}")
     
     def create_feature_importance_plots(self, analysis_ready_data: Dict[str, Dict]):
         """
         Create feature importance visualizations.
         """
-        print("Creating feature importance visualizations...")
+        self.logger.info("Starting feature importance visualization creation...")
         
         for dataset_name, data_dict in analysis_ready_data.items():
             if dataset_name == "uci_online_retail":
                 self.create_uci_feature_importance(data_dict['data'], dataset_name)
             elif dataset_name == "ecommerce_churn":
                 self.create_ecommerce_feature_importance(data_dict['data'], dataset_name)
+        
+        self.logger.info("Feature importance visualizations created successfully")
     
     def create_uci_feature_importance(self, data: pd.DataFrame, dataset_name: str):
         """
@@ -264,7 +257,7 @@ class VisualizationGenerator:
             plt.savefig(plot_path, dpi=300, bbox_inches='tight')
             plt.close()
             
-            print(f"Created feature importance plot for {dataset_name}")
+            self.logger.info(f"Feature importance plot created for {dataset_name}")
     
     def create_ecommerce_feature_importance(self, data: pd.DataFrame, dataset_name: str):
         """
@@ -296,14 +289,14 @@ class VisualizationGenerator:
             plt.savefig(plot_path, dpi=300, bbox_inches='tight')
             plt.close()
             
-            print(f"Created feature importance plot for {dataset_name}")
+            self.logger.info(f"Feature importance plot created for {dataset_name}")
     
     def create_all_visualizations(self, evaluation_results: Dict[str, Dict], 
                                  analysis_ready_data: Dict[str, Dict]):
         """
         Create all visualizations.
         """
-        print("Creating all visualizations...")
+        self.logger.info("Starting all visualization creation...")
         
         # Create data exploration plots
         self.create_data_exploration_plots(analysis_ready_data)
@@ -314,7 +307,7 @@ class VisualizationGenerator:
         # Create feature importance plots
         self.create_feature_importance_plots(analysis_ready_data)
         
-        print("All visualizations created successfully!")
+        self.logger.info("All visualizations created successfully!")
 
 def main():
     """Main function to run visualizations independently."""
