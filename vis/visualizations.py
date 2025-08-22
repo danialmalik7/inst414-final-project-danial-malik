@@ -27,11 +27,14 @@ class VisualizationGenerator:
         # Set up plotting style
         plt.style.use('default')
         
-        # Color scheme for churn analysis
+        # Professional color scheme for business analysis
         self.colors = {
-            'churned': '#ff6b6b',
-            'retained': '#4ecdc4',
-            'neutral': '#95a5a6'
+            'churned': '#d32f2f',      # Dark red - negative outcome
+            'retained': '#2e7d32',      # Dark green - positive outcome
+            'neutral': '#757575',       # Dark gray - neutral
+            'warning': '#f57c00',       # Orange - warning/attention needed
+            'success': '#388e3c',       # Green - success/good performance
+            'info': '#1976d2'           # Blue - informational
         }
     
     def create_data_exploration_plots(self, analysis_ready_data: Dict[str, Dict]):
@@ -64,9 +67,10 @@ class VisualizationGenerator:
             
             # Plot 1-3: RFM Distribution (top row)
             rfm_features = ['Recency', 'Frequency', 'Monetary']
+            rfm_colors = [self.colors['warning'], self.colors['success'], self.colors['info']]  # Orange, Green, Blue
             for i, feature in enumerate(rfm_features):
                 if feature in data.columns:
-                    axes[0, i].hist(data[feature], bins=30, alpha=0.7, color=self.colors['neutral'])
+                    axes[0, i].hist(data[feature], bins=30, alpha=0.7, color=rfm_colors[i])
                     axes[0, i].set_title(f'{feature} Distribution')
                     axes[0, i].set_xlabel(feature)
                     axes[0, i].set_ylabel('Count')
@@ -117,7 +121,7 @@ class VisualizationGenerator:
         
         # Plot 2: Tenure Distribution
         if 'Tenure' in data.columns:
-            axes[0, 1].hist(data['Tenure'], bins=30, alpha=0.7, color=self.colors['neutral'])
+            axes[0, 1].hist(data['Tenure'], bins=30, alpha=0.7, color=self.colors['info'])
             axes[0, 1].set_title('Tenure Distribution')
             axes[0, 1].set_xlabel('Tenure (months)')
             axes[0, 1].set_ylabel('Count')
@@ -125,7 +129,24 @@ class VisualizationGenerator:
         # Plot 3: Satisfaction Score
         if 'SatisfactionScore' in data.columns:
             satisfaction_counts = data['SatisfactionScore'].value_counts().sort_index()
-            axes[1, 0].bar(satisfaction_counts.index, satisfaction_counts.values, color=self.colors['neutral'])
+            
+            # Create color gradient: red (1) -> yellow (2-4) -> green (5)
+            colors = []
+            for score in satisfaction_counts.index:
+                if score == 1:
+                    colors.append('#d32f2f')  # Darker red for low satisfaction
+                elif score == 2:
+                    colors.append('#ff9800')  # Orange-yellow for below average
+                elif score == 3:
+                    colors.append('#ffc107')  # Amber for neutral
+                elif score == 4:
+                    colors.append('#ffeb3b')  # Bright yellow for above average
+                elif score == 5:
+                    colors.append('#4caf50')  # Proper green for high satisfaction
+                else:
+                    colors.append(self.colors['neutral'])
+            
+            axes[1, 0].bar(satisfaction_counts.index, satisfaction_counts.values, color=colors)
             axes[1, 0].set_title('Satisfaction Score Distribution')
             axes[1, 0].set_xlabel('Satisfaction Score')
             axes[1, 0].set_ylabel('Count')
@@ -178,19 +199,19 @@ class VisualizationGenerator:
             recalls.append(results['recall'])
         
         # Plot 1: Accuracy comparison
-        axes[0, 0].bar(model_names, accuracies, color=[self.colors['retained'], self.colors['churned']])
+        axes[0, 0].bar(model_names, accuracies, color=[self.colors['success'], self.colors['info']])
         axes[0, 0].set_title('Model Accuracy')
         axes[0, 0].set_ylabel('Accuracy')
         axes[0, 0].tick_params(axis='x', rotation=45)
         
         # Plot 2: F1 Score comparison
-        axes[0, 1].bar(model_names, f1_scores, color=[self.colors['retained'], self.colors['churned']])
+        axes[0, 1].bar(model_names, f1_scores, color=[self.colors['success'], self.colors['info']])
         axes[0, 1].set_title('Model F1 Score')
         axes[0, 1].set_ylabel('F1 Score')
         axes[0, 1].tick_params(axis='x', rotation=45)
         
         # Plot 3: Precision vs Recall
-        axes[1, 0].scatter(precisions, recalls, s=100, c=[self.colors['retained'], self.colors['churned']])
+        axes[1, 0].scatter(precisions, recalls, s=100, c=[self.colors['success'], self.colors['info']])
         for i, model in enumerate(model_names):
             axes[1, 0].annotate(model, (precisions[i], recalls[i]), xytext=(5, 5), textcoords='offset points')
         axes[1, 0].set_xlabel('Precision')
@@ -242,13 +263,27 @@ class VisualizationGenerator:
                 corr = abs(data[feature].corr(data['Churned']))
                 correlations.append(corr)
             
-            # Create plot
+            # Create plot with better spacing
             fig, ax = plt.subplots(figsize=(10, 6))
-            bars = ax.bar(numeric_features, correlations, color=self.colors['neutral'])
-            ax.set_title('Feature Importance (Correlation with Churn)')
-            ax.set_xlabel('Features')
-            ax.set_ylabel('Absolute Correlation')
-            ax.tick_params(axis='x', rotation=45)
+            
+            # Color bars based on correlation strength: low (gray) -> medium (blue) -> high (green)
+            colors = []
+            for corr in correlations:
+                if corr < 0.1:
+                    colors.append(self.colors['neutral'])      # Gray for low correlation
+                elif corr < 0.3:
+                    colors.append(self.colors['info'])         # Blue for medium correlation
+                else:
+                    colors.append(self.colors['success'])      # Green for high correlation
+            
+            bars = ax.bar(numeric_features, correlations, color=colors)
+            ax.set_title('Feature Importance (Correlation with Churn)', fontsize=14, pad=20)
+            ax.set_xlabel('Features', fontsize=12)
+            ax.set_ylabel('Absolute Correlation', fontsize=12)
+            
+            # Rotate x-axis labels for better readability
+            plt.xticks(rotation=45, ha='right', fontsize=10)
+            plt.yticks(fontsize=10)
             
             plt.tight_layout()
             
@@ -274,15 +309,31 @@ class VisualizationGenerator:
                 corr = abs(data[feature].corr(data[target_col]))
                 correlations.append(corr)
             
-            # Create plot
-            fig, ax = plt.subplots(figsize=(10, 6))
-            bars = ax.bar(numeric_features, correlations, color=self.colors['neutral'])
-            ax.set_title('Feature Importance (Correlation with Churn)')
-            ax.set_xlabel('Features')
-            ax.set_ylabel('Absolute Correlation')
-            ax.tick_params(axis='x', rotation=45)
+            # Create plot with larger figure size to accommodate rotated labels
+            fig, ax = plt.subplots(figsize=(14, 8))
             
+            # Color bars based on correlation strength: low (gray) -> medium (blue) -> high (green)
+            colors = []
+            for corr in correlations:
+                if corr < 0.1:
+                    colors.append(self.colors['neutral'])      # Gray for low correlation
+                elif corr < 0.3:
+                    colors.append(self.colors['info'])         # Blue for medium correlation
+                else:
+                    colors.append(self.colors['success'])      # Green for high correlation
+            
+            bars = ax.bar(numeric_features, correlations, color=colors)
+            ax.set_title('Feature Importance (Correlation with Churn)', fontsize=14, pad=20)
+            ax.set_xlabel('Features', fontsize=12)
+            ax.set_ylabel('Absolute Correlation', fontsize=12)
+            
+            # Rotate x-axis labels for better readability
+            plt.xticks(rotation=45, ha='right', fontsize=10)
+            plt.yticks(fontsize=10)
+            
+            # Add some padding and adjust layout
             plt.tight_layout()
+            plt.subplots_adjust(bottom=0.2)
             
             # Save plot
             plot_path = self.vis_dir / f"{dataset_name}_feature_importance.png"

@@ -16,6 +16,7 @@ class DataExtractor:
     
     def __init__(self):
         """Initialize the DataExtractor."""
+        self.source_dir = Path("source_data")
         self.data_dir = Path("data/extracted")
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.logger = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ class DataExtractor:
         Extract UCI Online Retail data.
         """
         try:
-            filepath = self.data_dir / "uci_online_retail.xlsx"
+            filepath = self.source_dir / "uci_online_retail.xlsx"
             
             if not filepath.exists():
                 self.logger.warning("UCI Online Retail Excel file not found")
@@ -46,7 +47,7 @@ class DataExtractor:
         Extract E-commerce Churn data.
         """
         try:
-            filepath = self.data_dir / "ecommerce_churn.xlsx"
+            filepath = self.source_dir / "ecommerce_churn.xlsx"
             
             if not filepath.exists():
                 self.logger.warning("E-commerce Churn Excel file not found")
