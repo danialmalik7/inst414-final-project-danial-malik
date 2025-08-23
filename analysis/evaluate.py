@@ -120,7 +120,6 @@ class ModelEvaluator:
             
         except Exception as e:
             self.logger.error(f"Error evaluating {model_name} on {dataset_name}: {str(e)}")
-            print(f"Error evaluating {model_name}: {str(e)}")
             raise
     
     def evaluate_dataset_models(self, dataset_models: Dict, data_dict: Dict, dataset_name: str):
@@ -145,7 +144,6 @@ class ModelEvaluator:
             
         except Exception as e:
             self.logger.error(f"Error evaluating models for {dataset_name}: {str(e)}")
-            print(f"Error evaluating models for {dataset_name}: {str(e)}")
             raise
     
     def evaluate_all_models(self, models: Dict[str, Dict], analysis_ready_data: Dict[str, Dict]):
@@ -202,15 +200,4 @@ class ModelEvaluator:
         except Exception as e:
             self.logger.error(f"Error creating evaluation summary: {str(e)}")
 
-def main():
-    """Main function to run model evaluation independently."""
-    # Setup basic logging for standalone execution
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-    
-    evaluator = ModelEvaluator()
-    
-    # Example usage
-    print("Model evaluation module")
-
-if __name__ == "__main__":
-    main() 
+ 

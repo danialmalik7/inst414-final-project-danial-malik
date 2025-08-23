@@ -158,15 +158,4 @@ class ChurnPredictor:
             self.logger.error(f"Error in model training pipeline: {str(e)}")
             raise
 
-def main():
-    """Main function to run model training independently."""
-    # Setup basic logging for standalone execution
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-    
-    predictor = ChurnPredictor()
-    
-    # Example usage
-    print("Model training module")
-
-if __name__ == "__main__":
-    main() 
+ 

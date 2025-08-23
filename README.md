@@ -13,7 +13,7 @@ This project predicts customer churn for e-commerce companies using machine lear
 2. Create virtual environment: `python -m venv venv`
 3. Activate: `source venv/bin/activate` (or `venv\Scripts\activate` on Windows)
 4. Install dependencies: `pip install -r requirements.txt`
-5. Add Excel files to `data/extracted/` directory
+5. **Source data is already included** in the `source_data/` directory
 
 ## Running
 ```bash
@@ -41,13 +41,15 @@ python main.py
 
 ## Project Structure
 ```
+├── source_data/            # Source Excel files (included in repo)
+│   ├── ecommerce_churn.xlsx
+│   └── uci_online_retail.xlsx
 ├── data/
-│   ├── extracted/          # Raw data files
-│   ├── processed/          # Cleaned data
-│   ├── outputs/            # Model outputs and evaluation results
-│   │   ├── evaluation_results/  # Detailed model evaluation outputs
-│   │   └── visualizations/      # Generated charts and plots
-│   └── reference-tables/   # Data dictionaries
+│   └── reference-tables/   # Data dictionaries and business rules
+│       ├── data_dictionary_*.csv
+│       ├── churn_thresholds.csv
+│       ├── customer_segments.csv
+│       └── enhanced_features_dictionary.csv
 ├── etl/
 │   ├── extract.py          # Data extraction with logging
 │   ├── transform.py        # Data cleaning with error handling
@@ -62,12 +64,20 @@ python main.py
 └── requirements.txt        # Dependencies
 ```
 
+**Note**: The `data/extracted/`, `data/processed/`, and `data/outputs/` directories are generated automatically when the pipeline runs.
+
 ## Output Files
 
+### Generated Data (Created by Pipeline)
+- `data/extracted/`: Raw CSV files extracted from source Excel files
+- `data/processed/`: Cleaned and transformed datasets with RFM features
+- `data/outputs/evaluation_results/`: Detailed model evaluation metrics and reports
+- `data/outputs/visualizations/`: Generated charts and plots for analysis
+
 ### Model Evaluation Results
-- `data/outputs/evaluation_results/`: Contains detailed evaluation metrics
 - `data/outputs/evaluation_results/evaluation_summary.csv`: Summary of all model performances
 - Individual model results stored in dataset-specific subdirectories
+- Confusion matrices, classification reports, and performance metrics
 
 ### Logs
 - `logs/pipeline_YYYYMMDD_HHMMSS.log`: Detailed execution logs for each pipeline run

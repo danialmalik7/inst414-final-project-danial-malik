@@ -102,17 +102,4 @@ class DataExtractor:
         
         return extracted_data
 
-def main():
-    """Main function to run data extraction independently."""
-    # Setup basic logging for standalone execution
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-    
-    extractor = DataExtractor()
-    extracted_data = extractor.extract_all_data()
-    
-    print(f"Extracted {len(extracted_data)} datasets:")
-    for name, data in extracted_data.items():
-        print(f"  - {name}: {len(data)} records")
 
-if __name__ == "__main__":
-    main()

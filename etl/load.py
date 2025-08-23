@@ -253,12 +253,4 @@ class DataLoader:
         
         return analysis_ready_data
 
-def main():
-    """Main function to run data loading independently."""
-    loader = DataLoader()
-    
-    # Example usage
-    print("Data loading module")
-
-if __name__ == "__main__":
-    main() 
+ 

@@ -107,25 +107,23 @@ class DataTransformer:
         """
         Define churn labels.
         """
-        print("Defining churn labels...")
-        
         # Define churn based on recency
         rfm_df['Churned'] = (rfm_df['Recency'] > self.churn_threshold_days).astype(int)
         
-        print(f"Churn rate: {rfm_df['Churned'].mean():.2%}")
+        churn_rate = rfm_df['Churned'].mean()
+        self.logger.info(f"Churn rate: {churn_rate:.2%}")
         return rfm_df
     
     def clean_ecommerce_churn(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Clean E-commerce Customer Churn data.
         """
-        print("Cleaning E-commerce Customer Churn dataset...")
-        
         # Make a copy to avoid modifying original
         df_clean = df.copy()
         
         # Handle missing values
-        print(f"Missing values: {df_clean.isnull().sum().sum()}")
+        missing_count = df_clean.isnull().sum().sum()
+        self.logger.info(f"Missing values: {missing_count}")
         
         # Fill missing values with appropriate defaults
         numeric_columns = df_clean.select_dtypes(include=[np.number]).columns
@@ -136,17 +134,17 @@ class DataTransformer:
         # Encode categorical variables
         categorical_columns = df_clean.select_dtypes(include=['object']).columns
         for col in categorical_columns:
-            if col != 'CustomerID':  # Skip CustomerID if it's categorical
+            if col != 'CustomerID': # Skip CustomerID if it's categorical
                 df_clean[col] = df_clean[col].astype('category').cat.codes
         
-        print(f"Cleaned dataset: {len(df_clean)} records")
+        self.logger.info(f"Cleaned dataset: {len(df_clean)} records")
         return df_clean
     
     def perform_eda(self, df: pd.DataFrame, dataset_name: str) -> Dict:
         """
         Perform basic EDA.
         """
-        print(f"Performing EDA for {dataset_name}...")
+        self.logger.info(f"Performing EDA for {dataset_name}...")
         
         eda_results = {
             'dataset_name': dataset_name,
@@ -161,7 +159,7 @@ class DataTransformer:
         if len(numeric_cols) > 0:
             eda_results['numeric_stats'] = df[numeric_cols].describe().to_dict()
         
-        print(f"EDA completed for {dataset_name}")
+        self.logger.info(f"EDA completed for {dataset_name}")
         return eda_results
     
     def transform_uci_data(self, raw_data_path: str) -> Tuple[pd.DataFrame, Dict]:
@@ -259,12 +257,4 @@ class DataTransformer:
         
         return transformed_data
 
-def main():
-    """Main function to run data transformation independently."""
-    transformer = DataTransformer()
-    
-    # Example usage
-    print("Data transformation module")
-
-if __name__ == "__main__":
-    main() 
+ 

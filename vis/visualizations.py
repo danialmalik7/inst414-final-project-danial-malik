@@ -360,12 +360,4 @@ class VisualizationGenerator:
         
         self.logger.info("All visualizations created successfully!")
 
-def main():
-    """Main function to run visualizations independently."""
-    viz_generator = VisualizationGenerator()
-    
-    # Example usage
-    print("Visualization module")
-
-if __name__ == "__main__":
-    main() 
+ 
