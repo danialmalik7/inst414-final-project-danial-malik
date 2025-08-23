@@ -52,7 +52,6 @@ def main():
     
     try:
         logger.info("Starting E-Commerce Churn Prediction Pipeline")
-        print("Starting E-Commerce Churn Prediction Pipeline")
 
         # Initialize pipeline components
         logger.info("Initializing pipeline components...")
@@ -66,7 +65,6 @@ def main():
 
         # ETL Pipeline
         logger.info("Step 1: Extracting data from sources")
-        print("Step 1: Extracting data from sources")
         try:
             raw_data_paths = extractor.extract_all_data()
             logger.info(f"Data extraction completed. Found {len(raw_data_paths)} datasets")
@@ -75,7 +73,6 @@ def main():
             raise
 
         logger.info("Step 2: Transforming and cleaning data")
-        print("Step 2: Transforming and cleaning data")
         try:
             processed_data_paths = transformer.transform_all_data(raw_data_paths)
             logger.info(f"Data transformation completed. Processed {len(processed_data_paths)} datasets")
@@ -84,7 +81,6 @@ def main():
             raise
 
         logger.info("Step 3: Loading processed data")
-        print("Step 3: Loading processed data")
         try:
             analysis_ready_data = loader.load_all_data(processed_data_paths)
             logger.info(f"Data loading completed. Loaded {len(analysis_ready_data)} datasets")
@@ -94,7 +90,6 @@ def main():
 
         # Analysis Pipeline
         logger.info("Step 4: Building churn prediction models")
-        print("Step 4: Building churn prediction models")
         try:
             models = predictor.train_models(analysis_ready_data)
             logger.info(f"Model training completed. Trained models for {len(models)} datasets")
@@ -103,7 +98,6 @@ def main():
             raise
 
         logger.info("Step 5: Evaluating model performance")
-        print("Step 5: Evaluating model performance")
         try:
             evaluation_results = evaluator.evaluate_all_models(models, analysis_ready_data)
             logger.info(f"Model evaluation completed. Evaluated models for {len(evaluation_results)} datasets")
@@ -113,7 +107,6 @@ def main():
 
         # Visualization Pipeline
         logger.info("Step 6: Generating visualizations")
-        print("Step 6: Generating visualizations")
         try:
             viz_generator.create_all_visualizations(evaluation_results, analysis_ready_data)
             logger.info("Visualization generation completed successfully")
@@ -122,11 +115,9 @@ def main():
             raise
 
         logger.info("Pipeline completed successfully!")
-        print("Pipeline completed!")
 
     except Exception as e:
         logger.error(f"Pipeline failed with error: {str(e)}")
-        print(f"Pipeline failed with error: {str(e)}")
         raise
 
 if __name__ == "__main__":
